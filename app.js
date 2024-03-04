@@ -1,6 +1,7 @@
 // Import required modules
 const express = require('express');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
 
 // Create an Express application
 const app = express();
@@ -37,9 +38,36 @@ app.get('/', (req, res) => {
 // Handle form submission
 app.post('/submit-form', (req, res) => {
     const { name, email, message } = req.body;
-    // Here you can process the form submission, e.g., send an email, save to a database, etc.
-    console.log(`Received form submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`);
-    res.send('Form submitted successfully!');
+
+    // Create a Nodemailer transporter object using SMTP transport
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.example.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'your_email@example.com',
+            pass: 'your_password'
+        }
+    });
+
+    // Set up email data
+    let mailOptions = {
+        from: '"Your Name" <your_email@example.com>',
+        to: 'recipient@example.com',
+        subject: 'New Message from Contact Form',
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log('Error occurred:', error.message);
+            res.send('An error occurred. Please try again later.');
+        } else {
+            console.log('Message sent:', info.messageId);
+            res.send('Form submitted successfully!');
+        }
+    });
 });
 
 // Start the server
