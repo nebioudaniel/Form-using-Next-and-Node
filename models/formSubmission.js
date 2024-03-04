@@ -1,32 +1,27 @@
-const mongoose = require('mongoose');
+const FormSubmission = require('../models/formSubmission');
 
-// Define schema for form submissions
-const formSubmissionSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true, // Field is required
-        trim: true // Removes whitespace from both ends of the string
-    },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true, // Converts email to lowercase
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'] // Validates email format
-    },
-    message: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now // Sets default value to current date and time
+// Handle form submission
+exports.submitForm = async (req, res) => {
+    const { name, email, message } = req.body;
+
+    try {
+        // Create a new formSubmission document
+        const formSubmission = new FormSubmission({
+            name,
+            email,
+            message
+        });
+
+        // Save the formSubmission document to the database
+        await formSubmission.save();
+
+        // Log the form submission
+        console.log(`Received form submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`);
+
+        // Respond to the client
+        res.send('Form submitted successfully!');
+    } catch (error) {
+        console.error('Error occurred while saving form submission:', error);
+        res.status(500).send('An error occurred. Please try again later.');
     }
-});
-
-// Create model for form submissions
-const FormSubmission = mongoose.model('FormSubmission', formSubmissionSchema);
-
-// Export the model
-module.exports = FormSubmission;
+};
