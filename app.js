@@ -9,8 +9,9 @@ const app = express();
 // Set up middleware to parse request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve HTML file with form
+// Serve HTML file with contact form
 app.get('/', (req, res) => {
+    // Send HTML response with contact form
     res.send(`
         <!DOCTYPE html>
         <html lang="en">
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 
 // Handle form submission
 app.post('/submit-form', (req, res) => {
+    // Extract form data
     const { name, email, message } = req.body;
 
     // Create a Nodemailer transporter object using SMTP transport
@@ -52,7 +54,7 @@ app.post('/submit-form', (req, res) => {
 
     // Set up email data
     let mailOptions = {
-        from: '"Your Name" <your_email@example.com>',
+        from: `"${name}" <${email}>`,
         to: 'recipient@example.com',
         subject: 'New Message from Contact Form',
         text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
@@ -61,9 +63,11 @@ app.post('/submit-form', (req, res) => {
     // Send email
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
+            // Log error and send response
             console.log('Error occurred:', error.message);
-            res.send('An error occurred. Please try again later.');
+            res.status(500).send('An error occurred. Please try again later.');
         } else {
+            // Log success and send response
             console.log('Message sent:', info.messageId);
             res.send('Form submitted successfully!');
         }
