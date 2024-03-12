@@ -30,3 +30,26 @@ exports.submitForm = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
+
+// Function to validate form submission
+function validateFormSubmission(name, email, message) {
+    // Add your validation logic here
+    // For example, check if name, email, and message are not empty
+    if (!name || !email || !message) {
+        throw new Error('Name, email, and message are required fields.');
+    }
+}
+
+// Function to sanitize form inputs
+function sanitizeInputs(name, email, message) {
+    // Add your sanitization logic here
+    // For example, remove any unwanted characters or HTML tags
+    const sanitizedName = name.trim();
+    const sanitizedEmail = email.trim();
+    const sanitizedMessage = message.trim();
+    return {
+        name: sanitizedName,
+        email: sanitizedEmail,
+        message: sanitizedMessage
+    };
+}
