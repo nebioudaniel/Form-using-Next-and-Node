@@ -1,3 +1,5 @@
+"use client"
+
 const FormSubmission = require('../models/formSubmission');
 const nodemailer = require('nodemailer');
 
@@ -6,26 +8,32 @@ exports.submitForm = async (req, res) => {
     const { name, email, message } = req.body;
 
     try {
+        // Validate form submission
+        validateFormSubmission(name, email, message);
+
+        // Sanitize form inputs
+        const { sanitizedName, sanitizedEmail, sanitizedMessage } = sanitizeInputs(name, email, message);
+
         // Create a new formSubmission document
         const formSubmission = new FormSubmission({
-            name,
-            email,
-            message
+            name: sanitizedName,
+            email: sanitizedEmail,
+            message: sanitizedMessage
         });
 
         // Save the formSubmission document to the database
         await formSubmission.save();
 
         // Log the form submission
-        console.log(`Received form submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`);
+        console.log(`Received form submission:\nName: ${sanitizedName}\nEmail: ${sanitizedEmail}\nMessage: ${sanitizedMessage}`);
 
         // Send email notification
-        await sendEmailNotification(name, email, message);
+        await sendEmailNotification(sanitizedName, sanitizedEmail, sanitizedMessage);
 
         // Respond to the client
         res.send('Form submitted successfully!');
     } catch (error) {
-        console.error('Error occurred while saving form submission:', error);
+        console.error('Error occurred while processing form submission:', error);
         res.status(500).send('An error occurred. Please try again later.');
     }
 };
@@ -77,44 +85,8 @@ function sanitizeInputs(name, email, message) {
     const sanitizedEmail = email.trim();
     const sanitizedMessage = message.trim();
     return {
-        name: sanitizedName,
-        email: sanitizedEmail,
-        message: sanitizedMessage
+        sanitizedName,
+        sanitizedEmail,
+        sanitizedMessage
     };
 }
-
-// Function to handle form submission
-exports.submitForm = async (req, res) => {
-    const { name, email, message } = req.body;
-
-    try {
-        // Validate form submission
-        validateFormSubmission(name, email, message);
-
-        // Sanitize form inputs
-        const sanitizedData = sanitizeInputs(name, email, message);
-        const { sanitizedName, sanitizedEmail, sanitizedMessage } = sanitizedData;
-
-        // Create a new formSubmission document
-        const formSubmission = new FormSubmission({
-            name: sanitizedName,
-            email: sanitizedEmail,
-            message: sanitizedMessage
-        });
-
-        // Save the formSubmission document to the database
-        await formSubmission.save();
-
-        // Log the form submission
-        console.log(`Received form submission:\nName: ${sanitizedName}\nEmail: ${sanitizedEmail}\nMessage: ${sanitizedMessage}`);
-
-        // Send email notification
-        await sendEmailNotification(sanitizedName, sanitizedEmail, sanitizedMessage);
-
-        // Respond to the client
-        res.send('Form submitted successfully!');
-    } catch (error) {
-        console.error('Error occurred while processing form submission:', error);
-        res.status(500).send('An error occurred. Please try again later.');
-    }
-};
