@@ -2,7 +2,30 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
 
+const contactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String,
+  sentAt: Date
+});
+
+const Contact = mongoose.model('Contact', contactSchema);
+
+app.post('/submit-form', async (req, res) => {
+  // ... previous code ...
+
+  try {
+    // Save contact message to the database
+    const newContact = new Contact({ name, email, message, sentAt: new Date() });
+    await newContact.save();
+    console.log('Contact saved to database:', newContact);
+  } catch (error) {
+    console.error('Error saving contact to database:', error);
+    res.status(500).send('An error occurred. Please try again later.');
+    return;
+  }
 // Create an Express application
 const app = express();
 
