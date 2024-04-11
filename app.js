@@ -4,29 +4,6 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 
-const contactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  message: String,
-  sentAt: Date
-});
-
-const Contact = mongoose.model('Contact', contactSchema);
-
-app.post('/submit-form', async (req, res) => {
-  // ... previous code ...
-
-  try {
-    // Save contact message to the database
-    const newContact = new Contact({ name, email, message, sentAt: new Date() });
-    await newContact.save();
-    console.log('Contact saved to database:', newContact);
-  } catch (error) {
-    console.error('Error saving contact to database:', error);
-    res.status(500).send('An error occurred. Please try again later.');
-    return;
-  }
-// Create an Express application
 const app = express();
 
 // Set up middleware to parse request bodies
@@ -59,42 +36,70 @@ app.get('/', (req, res) => {
     `);
 });
 
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/contactDB', { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Define contact schema and model
+const contactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String,
+  sentAt: Date
+});
+const Contact = mongoose.model('Contact', contactSchema);
+
 // Handle form submission
-app.post('/submit-form', (req, res) => {
+app.post('/submit-form', async (req, res) => {
     // Extract form data
     const { name, email, message } = req.body;
 
-    // Create a Nodemailer transporter object using SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.example.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: 'your_email@example.com',
-            pass: 'your_password'
-        }
-    });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send('Invalid email format.');
+    }
 
-    // Set up email data
-    let mailOptions = {
-        from: `"${name}" <${email}>`,
-        to: 'recipient@example.com',
-        subject: 'New Message from Contact Form',
-        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
-    };
+    try {
+        // Save contact message to the database
+        const newContact = new Contact({ name, email, message, sentAt: new Date() });
+        await newContact.save();
+        console.log('Contact saved to database:', newContact);
 
-    // Send email
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            // Log error and send response
-            console.log('Error occurred:', error.message);
-            res.status(500).send('An error occurred. Please try again later.');
-        } else {
-            // Log success and send response
-            console.log('Message sent:', info.messageId);
-            res.send('Form submitted successfully!');
-        }
-    });
+        // Create a Nodemailer transporter object using SMTP transport
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.example.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'your_email@example.com',
+                pass: 'your_password'
+            }
+        });
+
+        // Set up email data
+        let mailOptions = {
+            from: `"${name}" <${email}>`,
+            to: 'recipient@example.com',
+            subject: 'New Message from Contact Form',
+            text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+        };
+
+        // Send email
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                // Log error and send response
+                console.log('Error occurred:', error.message);
+                res.status(500).send('An error occurred. Please try again later.');
+            } else {
+                // Log success and send response
+                console.log('Message sent:', info.messageId);
+                res.send('Form submitted successfully!');
+            }
+        });
+    } catch (error) {
+        console.error('Error saving contact to database:', error);
+        res.status(500).send('An error occurred. Please try again later.');
+    }
 });
 
 // Start the server
