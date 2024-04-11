@@ -10,4 +10,7 @@ router.get('/', (req, res) => {
 // Route to handle form submission
 router.post('/submit-form', formController.submitForm);
 
+// Route to handle GET request for fetching form data
+router.get('/get-form-data', formController.getFormData);
+
 module.exports = router;
