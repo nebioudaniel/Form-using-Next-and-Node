@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve HTML file with contact form
 app.get('/', (req, res) => {
     // Send HTML response with contact form
-    res.send(`
+    res.send(
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
             </form>
         </body>
         </html>
-    `);
+    );
 });
 
 // Connect to MongoDB
