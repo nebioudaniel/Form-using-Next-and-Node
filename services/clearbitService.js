@@ -14,3 +14,4 @@ router.post('/submit-form', formController.submitForm);
 router.get('/get-form-data', formController.getFormData);
 
 module.exports = router;
+// exporting models in route;
