@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
     // Send HTML response with contact form
     res.send(
-        <!DOCTYPE html>
+        `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
                 <button type="submit">Submit</button>
             </form>
         </body>
-        </html>
+        </html>`
     );
 });
 
