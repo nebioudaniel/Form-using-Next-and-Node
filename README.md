@@ -1,4 +1,4 @@
-Form Submission Application
+**Form Submission Application**
 
 This is a simple web application built with Node.js and Express.js that allows users to submit a form with their name, email, and message. The submitted data is stored in a MongoDB database, and optionally, it can be enriched using the Clearbit API for additional information.
 
